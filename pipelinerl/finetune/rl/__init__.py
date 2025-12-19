@@ -317,8 +317,10 @@ def rl_step(
             # logger.info(value_predictions)
             # logger.info(lamda)
             # logger.info(len(segments))
-            # logger.info(segments)
-            advantages, _ = compute_gae_advantages(rewards=rewards, value_pred=value_predictions, lamda=lamda, segments=segments, logger=logger)
+            # logger.info("PRE-GAE DEBUG")
+            # logger.info(segments[-1][-1])
+            # logger.info(rewards.shape)
+            advantages, _ = compute_gae_advantages(rewards=rewards, value_pred=value_predictions, lamda=lamda, segments=segments, mask=masks_shifted, logger=logger)
         else:
             # Get value predictions if available
             # Compute value-based advantages: A(s,a) = MC_return - V(s)
@@ -442,10 +444,10 @@ def rl_step(
             sft_loss_total = sft_nll[..., :1].sum() * 0.0
         else:
             # weight with other losses ? KUSHA: should we do this?
-            # KUSHA: is sum_sum fine here? doesn't 
-            # sft_loss = sft_nll * tokens_weights
-            sft_loss = sft_nll
-            sft_loss_total = mask_mean(sft_loss, sft_mask)
+            # KUSHA: is sum_sum fine here? i think it's the same as mask_mean if we multipy in token_weights
+            sft_loss = sft_nll * tokens_weights
+            # sft_loss = sft_nll
+            sft_loss_total = sum_sum(sft_loss, sft_mask, segments)
 
         policy_loss_total += config.positive_example_sft_coef * sft_loss_total
 

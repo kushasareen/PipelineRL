@@ -1,1 +1,1 @@
-bash scripts/run.sh -a grpo -c math_trial_debug
+bash scripts/run.sh -a vapo -c math_trial_debug

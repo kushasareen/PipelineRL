@@ -38,6 +38,13 @@ def compute_gae_advantages(
         #  - (b, start, end) where end is the last token index in that segment (inclusive)
         #  - or (start, end) if you have a single-row packed layout
         if segments is not None:
+            # in the current code, segments is inclusive on both boundaries, we fix this
+            if len(segments[0]) == 2: 
+                segments = [(start, end-1) for (start, end) in segments]
+            elif len(segments[0]) == 3: 
+                segments = [(b, start, end-1) for (start, end) in segments]
+
+
             for seg in segments:
                 if len(seg) == 3:
                     b, start, end = seg
@@ -77,9 +84,16 @@ def compute_gae_advantages(
             terminal = terminal * mask.to(device=device, dtype=dtype)
 
         # keep reward only at terminal tokens
-        rewards = rewards * terminal
+        # print(T)
+        # print(segments[-1][-1])
+
 
         # logger.info("REWARD_DEBUG")
+        # logger.info(T)
+        # logger.info(segments[-1])
+        # if T != segments[-1][-1] + 1:
+        #     logger.warning("T SHOULD BE 1 MORE THAN segments[-1][-1]")
+        # logger.info(terminal)
         # logger.info(segments)
         # logger.info(rewards)
         # logger.info(rewards.sum())
@@ -115,14 +129,20 @@ def compute_gae_advantages(
 
 if __name__ == "__main__":
     rewards = torch.tensor([[0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]])
-    # values  = torch.tensor([[0.1, 0.3, 0.8, 0.7, 0.8, 0.1, 0.3, 0.8, 0.7, 0.8]])
-    values  = torch.zeros_like(rewards)
-    segments = [(0, 4), (4, 9)]
+    values  = torch.tensor([[0.1, 0.3, 0.8, 0.7, 0.8, 0.1, 0.3, 0.8, 0.7, 0.8]])
+    values = torch.zeros_like(rewards)
+    masks_shifted = torch.ones_like(rewards)
+    segments = [(0, 5), (5, 11)]
+    # print(len(rewards[0]))
+    # print(rewards[0][5:10])
+
 
     advantages, returns = compute_gae_advantages(
         rewards=rewards,
         value_pred=values,
-        lamda=0.95,
+        lamda=0.9,
+        segments=segments,
+        mask=masks_shifted
     )
 
     print("advantages:", advantages)
