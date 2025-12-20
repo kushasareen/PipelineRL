@@ -209,3 +209,155 @@ class AutoModelForCausalLMWithValueHead(nn.Module):
             return super().__getattr__(name)
         except AttributeError:
             return getattr(self.pretrained_model, name)
+
+class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
+    """
+    A wrapper around a causal language model that contains a total separate value model for PPO training.
+    """
+
+    def __init__(self, pretrained_model):
+        super().__init__()
+        self.pretrained_model = pretrained_model
+        self.value_model = None # TODO
+        self.config = pretrained_model.config
+
+        # Copy relevant attributes from the pretrained model
+        self.main_input_name = pretrained_model.main_input_name
+
+    def forward(
+        self,
+        input_ids: torch.LongTensor,
+        attention_mask: Optional[torch.Tensor] = None,
+        position_ids: Optional[torch.LongTensor] = None,
+        past_key_values: Optional[Tuple[Tuple[torch.Tensor]]] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
+        labels: Optional[torch.LongTensor] = None,
+        use_cache: Optional[bool] = None,
+        output_attentions: Optional[bool] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+    ) -> Union[Tuple, CausalLMOutputWithValue]:
+        """
+        Forward pass that computes both language modeling outputs and value predictions.
+        """
+
+        # Get outputs from the base model
+        outputs = self.pretrained_model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            inputs_embeds=inputs_embeds,
+            labels=labels,
+            use_cache=use_cache,
+            output_attentions=output_attentions,
+            output_hidden_states=True,
+            return_dict=True,
+        )
+
+        # Get the last hidden states
+        hidden_states = outputs.hidden_states[-1]
+
+        # Compute values
+        values = self.value_model() ## TODO:
+
+        return CausalLMOutputWithValue(
+            loss=outputs.loss,
+            logits=outputs.logits,
+            value=values,
+            past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+        )
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
+        """Enable gradient checkpointing for the model."""
+        self.pretrained_model.gradient_checkpointing_enable(
+            gradient_checkpointing_kwargs
+        )
+        self.value_model.gradient_checkpointing_enable(
+            gradient_checkpointing_kwargs
+        )
+    
+    def save_pretrained(
+        self,
+        save_directory: Union[str, os.PathLike],
+        is_main_process: bool = True,
+        state_dict: Optional[dict] = None,
+        save_function: callable = torch.save,
+        safe_serialization: bool = False,
+        **kwargs,
+    ):
+        """Save model and value head separately."""
+        import os
+        
+        if state_dict is None:
+            state_dict = self.state_dict()
+        
+        # Extract pretrained model and value head state dicts
+        pretrained_model_state_dict = {}
+        value_head_state_dict = {}
+        
+        for key, value in state_dict.items():
+            if key.startswith("pretrained_model."):
+                # Remove the "pretrained_model." prefix
+                new_key = key[len("pretrained_model."):]
+                pretrained_model_state_dict[new_key] = value
+            else:
+                raise ValueError(
+                    f"Unexpected key in state dict: {key}. "
+                    "Expected keys should start with 'value_head.' or 'pretrained_model.'."
+                )
+        
+        # Save the pretrained model which can be easily loaded by vllm, etc.
+        self.pretrained_model.save_pretrained(
+            save_directory,
+            is_main_process=is_main_process,
+            state_dict=pretrained_model_state_dict,
+            save_function=save_function,
+            safe_serialization=safe_serialization,
+            **kwargs,
+        )
+
+        value_path = os.path.join(save_directory, "value_model")
+        self.value_model.save_pretrained( # TODO
+            value_path,
+            is_main_process=is_main_process,
+            state_dict=pretrained_model_state_dict,
+            save_function=save_function,
+            safe_serialization=safe_serialization,
+            **kwargs,
+        )
+        
+        # Save value head separately
+        # if is_main_process:
+        #     value_head_path = os.path.join(save_directory, "value_head.pt")
+        #     save_function(value_head_state_dict, value_head_path)
+        #     logger.info(f"Saved value head to {value_head_path}")
+
+    @classmethod
+    def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
+        """Load a model with value head from pretrained weights."""
+
+        logger.info(f"Loading pretrained model from {pretrained_model_name_or_path}...")
+
+        # Load the base model
+        pretrained_model = AutoModelForCausalLM.from_pretrained(
+            pretrained_model_name_or_path, *model_args, **kwargs
+        )
+        value_model_name_or_path = None # TODO
+        value_model = AutoModelForCausalLM.from_pretrained(
+            value_model_name_or_path, *model_args, **kwargs
+        )
+
+        # Create the model with value head
+        model = cls(pretrained_model, value_model)
+
+        return model
+
+    def __getattr__(self, name):
+        """Forward attribute access to the pretrained model."""
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return getattr(self.pretrained_model, name)

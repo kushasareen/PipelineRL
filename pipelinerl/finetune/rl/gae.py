@@ -102,7 +102,9 @@ def compute_gae_advantages(
         # logger.info(rewards.sum())
 
         # zero out rewards at non-terminal tokens
+        print("rewards_pre_terminal", rewards, rewards.shape)
         rewards = rewards * terminal
+        print("rewards_post_terminal", rewards, rewards.shape)
 
 
         advantages = torch.zeros_like(rewards)
@@ -152,61 +154,3 @@ if __name__ == "__main__":
     )
 
     print("advantages:", advantages)
-
-    # rewards = torch.tensor([[1.0, 1.0, 1.0, 1.0]])
-    # values  = torch.zeros_like(rewards)
-
-    # lamda = torch.tensor([[0.0, 0.0, 1.0, 1.0]])  # early stop, then accumulate
-
-    # advantages, _ = compute_gae_advantages(
-    #     rewards=rewards,
-    #     value_pred=values,
-    #     lamda=lamda,
-    #     gamma=1.0,
-    # )
-
-    # print("advantages:", advantages)
-
-
-    # rewards = torch.tensor([[1.0, 1.0, 10.0, 10.0]])
-    # values  = torch.zeros_like(rewards)
-
-    # # End segment at index 1
-    # segments = [(0, 0, 1), (0, 2, 3)]
-
-    # advantages, _ = compute_gae_advantages(
-    #     rewards=rewards,
-    #     value_pred=values,
-    #     lamda=1.0,
-    #     gamma=1.0,
-    #     segments=segments,
-    # )
-
-    # print("advantages:", advantages)
-    # rewards = torch.tensor([[1.0, 1.0, 0.0, 0.0]])
-    # values  = torch.zeros_like(rewards)
-    # mask    = torch.tensor([[1, 1, 0, 0]], dtype=torch.bool)
-
-    # advantages, _ = compute_gae_advantages(
-    #     rewards=rewards,
-    #     value_pred=values,
-    #     lamda=1.0,
-    #     gamma=1.0,
-    #     mask=mask,
-    # )
-
-    # print("advantages:", advantages)
-
-    # rewards = torch.tensor([[0.0, 0.0, 0.0, 0.0, 1.0]])
-    # values  = torch.tensor([[1.0, 0.0, 1.0, 0.0, 1.0]])
-
-    # advantages, _ = compute_gae_advantages(
-    #     rewards=rewards,
-    #     value_pred=values,
-    #     lamda=0.99,
-    #     gamma=1.0,
-    # )
-
-    # print("advantages:", advantages)
-
-

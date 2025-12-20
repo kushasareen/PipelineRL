@@ -177,8 +177,9 @@ def rl_step(
     # pre-compute masks
     masks = batch.labels != -100
     masks_shifted = masks[:, 1:]
+    # print("masks", masks_shifted)
 
-    has_value_head = hasattr(model, 'value_head')
+    has_value = hasattr(model, 'value_head') or hasattr(model, 'value_model')
 
     # if we have position_ids, we are packing
     if batch.is_packed:
@@ -263,7 +264,7 @@ def rl_step(
     log_ratio_ref_new = ref_logprobs - new_logprobs
     assert torch.isfinite(log_ratio_ref_new).all(), f"log_ratio_ref_new is not finite: {log_ratio_ref_new}"
 
-    if has_value_head:
+    if has_value:
         value_predictions = outputs.value[:, :-1] # no target for the last token 
 
         # KUSHA: implement here the GAE calculation
@@ -451,7 +452,7 @@ def rl_step(
 
         policy_loss_total += config.positive_example_sft_coef * sft_loss_total
 
-    if has_value_head:
+    if has_value:
         # KUSHA: this is equivalent to GAE with lambda = 1.0 for the value network
 
         # Get the value predictions
@@ -524,7 +525,7 @@ def rl_step(
         "input_size": batch.input_ids.numel(), 
     }
 
-    if has_value_head:
+    if has_value:
         stats["value_mean"] = sum_sum(value_predictions / num_labels_in_seq, masks_shifted, segments).item()
         stats["value_max"] = value_predictions[masks_shifted].max().item() if masks_shifted.any() else 0.0
         stats["value_min"] = value_predictions[masks_shifted].min().item() if masks_shifted.any() else 0.0
