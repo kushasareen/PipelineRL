@@ -80,6 +80,7 @@ def compute_gae_advantages(
         print("segments:", segments)
         print("mask:", mask)
         print("terminal:", terminal)
+        print("value_pred:", value_pred)
 
         # (optional but recommended) don't ever put reward on invalid/padded tokens
         if mask is not None:
@@ -99,6 +100,9 @@ def compute_gae_advantages(
         # logger.info(segments)
         # logger.info(rewards)
         # logger.info(rewards.sum())
+
+        # zero out rewards at non-terminal tokens
+        rewards = rewards * terminal
 
 
         advantages = torch.zeros_like(rewards)
@@ -130,10 +134,10 @@ def compute_gae_advantages(
         return advantages, returns
 
 if __name__ == "__main__":
-    rewards = torch.tensor([[0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]])
-    values  = torch.tensor([[0.1, 0.3, 0.8, 0.7, 0.8, 0.1, 0.3, 0.8, 0.7, 0.8]])
-    values = torch.zeros_like(rewards)
-    masks_shifted = torch.ones_like(rewards)
+    rewards = torch.tensor([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]])
+    values  = torch.tensor([[0.1, 0.3, 0.8, 0.7, 0.8, 0.1, 0.3, 0.8, 0.7, 0.8, 0.0, 0.0, 0.0, 0.0]])
+    # values = torch.zeros_like(rewards)
+    masks_shifted = torch.tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]])
     segments = [(0, 5), (5, 11)]
     # print(len(rewards[0]))
     # print(rewards[0][5:10])
