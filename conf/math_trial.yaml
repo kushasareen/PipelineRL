@@ -13,7 +13,7 @@ dataset_loader: pipelinerl.domains.math.load_datasets
 train_dataset_names:
   - numina
 test_dataset_names: # KUSHA: edit later
-  - lighteval/MATH-Hard
+  - math_hard_test
   # - aime_2025
   # - amc_2023
   # - math_500

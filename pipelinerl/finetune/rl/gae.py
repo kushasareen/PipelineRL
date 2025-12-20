@@ -77,7 +77,9 @@ def compute_gae_advantages(
         # currently the entire sequence gets a reward of 1 if the answer was correct, we'll fix this here
         # terminal is 1 at end-of-segment tokens, 0 otherwise
         terminal = (1.0 - cont)
-        print(terminal)
+        print("segments:", segments)
+        print("mask:", mask)
+        print("terminal:", terminal)
 
         # (optional but recommended) don't ever put reward on invalid/padded tokens
         if mask is not None:

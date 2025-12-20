@@ -265,6 +265,12 @@ def load_datasets(dataset_names: List[str] | str | None, seed: int | None = None
         logger.info(f"Loading NuminaMath preview train dataset: {len(samples)} samples")
         datasets += add_ids(samples)
 
+    if "math_hard_test" in dataset_names:
+        dataset = load_dataset("lighteval/MATH-Hard", split="test", trust_remote_code=True)
+        samples = [s for s in process_math(dataset, "math_hard") if s is not None]
+        logger.info(f"Loading lighteval/MATH-Hard test dataset: {len(samples)} samples")
+        datasets += add_ids(samples)
+
     if "math_test" in dataset_names:
         # math_dataset = load_math("test")
         dataset = load_dataset("hendrycks/competition_math", split="test", trust_remote_code=True)

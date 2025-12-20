@@ -12,7 +12,7 @@ do
 done
 
 echo "Starting job: $algo, $id"
-NAME=""${algo}""
+NAME=""${algo}_${id}""
 
 sbatch <<EOT
 #!/bin/bash
