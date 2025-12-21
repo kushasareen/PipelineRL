@@ -44,7 +44,7 @@ lr_scheduler_type: cosine # could be cosine, constant_with_warmup
 # Number of warmup (completed) steps in the learning rate schedule.
 num_warmup_steps: 20
 # Number of gradient accumulation steps.
-gradient_accumulation_passes: 320 # KUSHA: 50 * 16 = 320 trajectories per update
+gradient_accumulation_passes: 512 # KUSHA: 50 * 16 = 320 trajectories per update
 # Use gradient checkpointing to reduce memory footprint.
 gradient_checkpointing: true
 # see https://medium.com/pytorch/how-activation-checkpointing-enables-scaling-up-training-deep-learning-models-7a93ae01ff2d

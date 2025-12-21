@@ -107,7 +107,7 @@ class RLConfig(BaseModel):
         description="Use GAE lambda for the policy advantage calculation",
     )
     policy_gae_lambda: float = Field(
-        default=0.95,
+        default=1.0,
         description="Coefficient for policy GAE",
     )
 
@@ -278,6 +278,8 @@ def rl_step(
                 if not batch.is_packed:
                     # length per sequence (count of valid tokens in that row)
                     lengths_seq = valid.sum(dim=1).to(dtype=value_predictions.dtype)  # [B]
+                    logger.info(f"Lengths seq for adaptive GAE: {lengths_seq}")
+                    logger.info(f"Masks = {valid}")
 
                     # adaptive lambda per sequence, then broadcast to tokens
                     lengths_seq = lengths_seq.clamp(min=1.0)  # avoid div-by-zero
@@ -320,7 +322,11 @@ def rl_step(
             # logger.info(len(segments))
             # logger.info("PRE-GAE DEBUG")
             # logger.info(segments[-1][-1])
-            # logger.info(rewards.shape)
+            logger.info(f"Rewards: {rewards}")
+            logger.info(rewards.shape)
+            logger.info(lamda.shape)
+            logger.info(f"Using GAE for policy with lambda={lamda} and mean lamda={lamda.mean() if isinstance(lamda, torch.Tensor) else lamda}")
+
             advantages, _ = compute_gae_advantages(rewards=rewards, value_pred=value_predictions, lamda=lamda, segments=segments, mask=masks_shifted, logger=logger)
         else:
             # Get value predictions if available

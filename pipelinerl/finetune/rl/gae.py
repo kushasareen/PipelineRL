@@ -133,6 +133,7 @@ def compute_gae_advantages(
             advantages[:, t] = last_gae
 
         returns = advantages + value_pred
+        print("advantages:", advantages)
         return advantages, returns
 
 if __name__ == "__main__":
