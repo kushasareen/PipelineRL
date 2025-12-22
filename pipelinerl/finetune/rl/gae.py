@@ -77,10 +77,10 @@ def compute_gae_advantages(
         # currently the entire sequence gets a reward of 1 if the answer was correct, we'll fix this here
         # terminal is 1 at end-of-segment tokens, 0 otherwise
         terminal = (1.0 - cont)
-        print("segments:", segments)
-        print("mask:", mask)
-        print("terminal:", terminal)
-        print("value_pred:", value_pred)
+        # print("segments:", segments)
+        # print("mask:", mask)
+        # print("terminal:", terminal)
+        # print("value_pred:", value_pred)
 
         # (optional but recommended) don't ever put reward on invalid/padded tokens
         if mask is not None:
@@ -102,9 +102,9 @@ def compute_gae_advantages(
         # logger.info(rewards.sum())
 
         # zero out rewards at non-terminal tokens
-        print("rewards_pre_terminal", rewards, rewards.shape)
+        # print("rewards_pre_terminal", rewards, rewards.shape)
         rewards = rewards * terminal
-        print("rewards_post_terminal", rewards, rewards.shape)
+        # print("rewards_post_terminal", rewards, rewards.shape)
 
 
         advantages = torch.zeros_like(rewards)
@@ -133,7 +133,7 @@ def compute_gae_advantages(
             advantages[:, t] = last_gae
 
         returns = advantages + value_pred
-        print("advantages:", advantages)
+        # print("advantages:", advantages)
         return advantages, returns
 
 if __name__ == "__main__":

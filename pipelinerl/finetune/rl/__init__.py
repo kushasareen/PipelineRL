@@ -271,37 +271,25 @@ def rl_step(
         # KUSHA: maybe we should follow the comment and clamp the value predictions?
         if config.use_policy_gae:
             if config.adaptive_policy_gae:
-                # define lengths, it might be easier if we have one lamda per token
-
-                valid = masks_shifted
-
                 if not batch.is_packed:
                     # length per sequence (count of valid tokens in that row)
-                    lengths_seq = valid.sum(dim=1).to(dtype=value_predictions.dtype)  # [B]
-                    logger.info(f"Lengths seq for adaptive GAE: {lengths_seq}")
-                    logger.info(f"Masks = {valid}")
+                    lengths_seq = masks_shifted.sum(dim=1).to(dtype=value_predictions.dtype)  # [B]
 
                     # adaptive lambda per sequence, then broadcast to tokens
                     lengths_seq = lengths_seq.clamp(min=1.0)  # avoid div-by-zero
                     lam_seq = 1.0 - 1.0 / (config.adaptive_policy_gae_coef * lengths_seq)  # [B]
                     lam_seq = lam_seq.clamp(min=0.0, max=1.0)
-
-                    lamda = lam_seq[:, None].expand_as(valid).to(dtype=value_predictions.dtype)  # [B, T-1]
+                    lamda = lam_seq[:, None].expand_as(masks_shifted).to(dtype=value_predictions.dtype)  # [B, T-1]
 
                 else:
                     # length per segment (packed sequences)
-                    ones = valid.to(dtype=value_predictions.dtype)  # [B, T-1]
-                    zeros = torch.zeros_like(ones)
-
-                    # tok_count is number of valid tokens per segment
                     _, _, tok_count = per_segment_sums(
                         batch.segment_ids,
-                        valid,
-                        ones,
-                        zeros,
+                        masks_shifted,
+                        log_ratio_new_old,   # dummy
+                        torch.zeros_like(log_ratio_new_old), # dummy
                         seq_parallel_group=seq_parallel_group,
-                    ) 
-
+                    )
                     tok_count = tok_count.to(dtype=value_predictions.dtype).clamp(min=1.0)  # [num_segments]
 
                     lam_seg = 1.0 - 1.0 / (config.adaptive_policy_gae_coef * tok_count)  # [num_segments]
@@ -309,6 +297,7 @@ def rl_step(
 
                     # map segment lambdas back to tokens
                     lamda = lam_seg[batch.segment_ids].to(dtype=value_predictions.dtype)  # [B, T-1]
+                    lamda = lamda[:, 1:]
 
             else:
                 lamda = config.policy_gae_lambda
@@ -322,10 +311,10 @@ def rl_step(
             # logger.info(len(segments))
             # logger.info("PRE-GAE DEBUG")
             # logger.info(segments[-1][-1])
-            logger.info(f"Rewards: {rewards}")
-            logger.info(rewards.shape)
-            logger.info(lamda.shape)
-            logger.info(f"Using GAE for policy with lambda={lamda} and mean lamda={lamda.mean() if isinstance(lamda, torch.Tensor) else lamda}")
+            # logger.info(f"Rewards: {rewards}")
+            # logger.info(f"Reward shape: {rewards.shape}")
+            # logger.info(f"Lamda shape: {lamda.shape}")
+            # logger.info(f"Using GAE for policy with lambda={lamda} and mean lamda={lamda.mean() if isinstance(lamda, torch.Tensor) else lamda}")
 
             advantages, _ = compute_gae_advantages(rewards=rewards, value_pred=value_predictions, lamda=lamda, segments=segments, mask=masks_shifted, logger=logger)
         else:

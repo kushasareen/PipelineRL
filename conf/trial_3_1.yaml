@@ -1,0 +1,14 @@
+defaults:
+  - trial
+  - _self_
+
+world: 
+  replicas: 1
+  
+  actor_fraction: 3    # Changed from 2 to 3 (3 GPUs for Inference)
+  preprocessor_fraction: 0
+  finetune_fraction: 1 # Changed from 2 to 1 (1 GPU for Training)
+
+  env_replicas: 1
+
+use_deepspeed: false
