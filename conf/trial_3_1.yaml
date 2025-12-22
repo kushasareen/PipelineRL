@@ -12,3 +12,4 @@ world:
   env_replicas: 1
 
 use_deepspeed: false
+accelerate_config: single_mp
