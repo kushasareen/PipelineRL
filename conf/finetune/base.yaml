@@ -70,7 +70,7 @@ output_dir: ${..output_dir}/finetune
 # Training seed.
 seed: 42
 # Interval to save checkpoints.
-save_checkpoint_steps: 100
+save_checkpoint_steps: 20
 # Whether to keep intermediate checkpoints
 keep_intermediate_checkpoints: True
 # Whether to allow loading external model code
