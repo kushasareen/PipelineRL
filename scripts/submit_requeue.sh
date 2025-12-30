@@ -32,9 +32,6 @@ sbatch <<EOT
 #SBATCH --job-name=$NAME
 #SBATCH --signal=B:TERM@120
 
-set -e
-
-
 echo "Job is running... Restart count: \${SLURM_RESTART_COUNT:-0}"
 
 handle_timeout() {
@@ -46,7 +43,7 @@ handle_timeout() {
     exit 0
 }
 
-trap 'handle_timeout' SIGTERM
+trap 'handle_timeout' TERM
 
 export HF_HOME="$SCRATCH/cache"
 export NUM_GPUS=4
@@ -56,5 +53,5 @@ cd ~/PipelineRL
 . tamia_activate.sh
 source .env
 
-bash scripts/run.sh -a $algo -c $conf -i $id
+srun --kill-on-bad-exit=1 bash scripts/run.sh -a $algo -c $conf -i $id
 EOT
