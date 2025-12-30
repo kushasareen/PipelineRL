@@ -1,4 +1,5 @@
 data: null
+value_model_path: null
 # Model class. Must be one of the following: causal-language-modeling, seq2seq-language-modeling, vision2seq-language-modeling
 model_class: causal-language-modeling
 # Model name or path of model to be trained.
@@ -62,7 +63,7 @@ interrupt_train_steps: -1
 # Maximum number of evaluation (completed) steps. If -1 the full dataset is evaluated.
 max_eval_steps: -1
 # Sequence lengths used for training.
-seq_length: 12000 # 12000 before fp32 lm head
+seq_length: 10000 # 12000 before fp32 lm head
 
 seq_packing: true
 output_dir: ${..output_dir}/finetune

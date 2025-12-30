@@ -215,11 +215,17 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
     A wrapper around a causal language model that contains a total separate value model for PPO training.
     """
 
-    def __init__(self, pretrained_model):
-        super().__init__()
+    def __init__(self, pretrained_model, value_model):
+        super().__init__(pretrained_model)
         self.pretrained_model = pretrained_model
-        self.value_model = None # TODO
+        self.value_model = value_model
         self.config = pretrained_model.config
+        self.value_config = value_model.config
+        hidden_size = self.config.hidden_size
+        logger.info(f"Initializing value model with hidden size {hidden_size}")
+
+        # Initialize value head
+        self.value_head = ValueHead(hidden_size)
 
         # Copy relevant attributes from the pretrained model
         self.main_input_name = pretrained_model.main_input_name
@@ -255,11 +261,25 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
             return_dict=True,
         )
 
+        # Compute values
+        values_outputs = self.value_model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            inputs_embeds=inputs_embeds,
+            labels=labels,
+            use_cache=use_cache,
+            output_attentions=output_attentions,
+            output_hidden_states=True,
+            return_dict=True,
+        )
+
         # Get the last hidden states
-        hidden_states = outputs.hidden_states[-1]
+        hidden_states = values_outputs.hidden_states[-1]
 
         # Compute values
-        values = self.value_model() ## TODO:
+        values = self.value_head(hidden_states)
 
         return CausalLMOutputWithValue(
             loss=outputs.loss,
@@ -299,7 +319,11 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
         value_head_state_dict = {}
         
         for key, value in state_dict.items():
-            if key.startswith("pretrained_model."):
+            if key.startswith("value_head."):
+                # Remove the "value_head." prefix
+                new_key = key[len("value_head."):]
+                value_head_state_dict[new_key] = value
+            elif key.startswith("pretrained_model."):
                 # Remove the "pretrained_model." prefix
                 new_key = key[len("pretrained_model."):]
                 pretrained_model_state_dict[new_key] = value
@@ -330,28 +354,35 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
         )
         
         # Save value head separately
-        # if is_main_process:
-        #     value_head_path = os.path.join(save_directory, "value_head.pt")
-        #     save_function(value_head_state_dict, value_head_path)
-        #     logger.info(f"Saved value head to {value_head_path}")
+        if is_main_process:
+            value_head_path = os.path.join(save_directory, "value_head.pt")
+            save_function(value_head_state_dict, value_head_path)
+            logger.info(f"Saved value head to {value_head_path}")
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
         """Load a model with value head from pretrained weights."""
 
         logger.info(f"Loading pretrained model from {pretrained_model_name_or_path}...")
+        value_model_name_or_path = kwargs.pop("value_model_path", None)
+        logger.info(f"Loading value model from {value_model_name_or_path}...")
 
         # Load the base model
         pretrained_model = AutoModelForCausalLM.from_pretrained(
             pretrained_model_name_or_path, *model_args, **kwargs
         )
-        value_model_name_or_path = None # TODO
         value_model = AutoModelForCausalLM.from_pretrained(
             value_model_name_or_path, *model_args, **kwargs
         )
 
         # Create the model with value head
         model = cls(pretrained_model, value_model)
+
+        # Try to load value head weights if they exist
+        value_head_path = os.path.join(pretrained_model_name_or_path, "value_head.pt")
+        if os.path.exists(value_head_path):
+            value_head_state_dict = torch.load(value_head_path, map_location="cpu")
+            model.value_head.load_state_dict(value_head_state_dict)
 
         return model
 

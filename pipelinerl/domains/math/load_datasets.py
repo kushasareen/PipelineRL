@@ -265,6 +265,12 @@ def load_datasets(dataset_names: List[str] | str | None, seed: int | None = None
         logger.info(f"Loading NuminaMath preview train dataset: {len(samples)} samples")
         datasets += add_ids(samples)
 
+    if "polaris" in dataset_names:
+        dataset = load_dataset("POLARIS-Project/Polaris-Dataset-53K", split="train", trust_remote_code=True)
+        samples = [s for s in process_math(dataset, "polaris") if s is not None]
+        logger.info(f"Loading Polaris train dataset: {len(samples)} samples")
+        datasets += add_ids(samples)
+
     if "math_hard_test" in dataset_names:
         dataset = load_dataset("lighteval/MATH-Hard", split="test", trust_remote_code=True)
         samples = [s for s in process_math(dataset, "math_hard") if s is not None]
@@ -330,25 +336,25 @@ def load_datasets(dataset_names: List[str] | str | None, seed: int | None = None
         datasets += add_ids(samples)
 
     if "aime_2022" in dataset_names:
-        datasets += _load_aime_dataset(2022, upsample_factor=16)
+        datasets += _load_aime_dataset(2022, upsample_factor=64)
 
     if "aime_2022_original" in dataset_names:
         datasets += _load_aime_dataset(2022)
 
     if "aime_2023" in dataset_names:
-        datasets += _load_aime_dataset(2023, upsample_factor=16)
+        datasets += _load_aime_dataset(2023, upsample_factor=64)
 
     if "aime_2023_original" in dataset_names:
         datasets += _load_aime_dataset(2023)
 
     if "aime_2024" in dataset_names:
-        datasets += _load_aime_dataset(2024, upsample_factor=16)
+        datasets += _load_aime_dataset(2024, upsample_factor=64)
 
     if "aime_2024_original" in dataset_names:
         datasets += _load_aime_dataset(2024)
 
     if "aime_2025" in dataset_names:
-        upsample_factor = 32
+        upsample_factor = 64
         dataset = load_dataset("math-ai/aime25", split="test", trust_remote_code=True)
         samples = [s for s in process_aime_and_amc(dataset, dataset_name='aime') if s is not None]
         if upsample_factor > 0:
@@ -358,13 +364,13 @@ def load_datasets(dataset_names: List[str] | str | None, seed: int | None = None
 
     if "amc_2022" in dataset_names:
         # TODO: AMC 2022 is 43 problems, is that to be expected?
-        datasets += _load_amc_dataset(2022, upsample_factor=16)
+        datasets += _load_amc_dataset(2022, upsample_factor=32)
 
     if "amc_2022_original" in dataset_names:
         datasets += _load_amc_dataset(2022)
 
     if "amc_2023" in dataset_names:
-        datasets += _load_amc_dataset(2023, upsample_factor=16)
+        datasets += _load_amc_dataset(2023, upsample_factor=32)
 
     if "amc_2023_original" in dataset_names:
         datasets += _load_amc_dataset(2023)

@@ -22,5 +22,7 @@ test_dataset_names: # KUSHA: edit later
 
 max_prompt_characters: 4000
 
+model_path: Qwen/Qwen3-4B-Base
+
 # debug: # KUSHA: remove later
 #   debug_mode: finetune

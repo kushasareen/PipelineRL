@@ -10,6 +10,8 @@ seed: 42
 fp32_lm_head: false # KUSHA: could also be false # KUSHA: make it true later
 fp32_layer_prefix: "lm_head"  # "lm_head" | "output" | "embed_out" | "head"
 
+max_prompt_characters: null
+
 finetune:
   seed: ${..seed}
 
@@ -49,12 +51,15 @@ llm:
     max_tokens: 8192
     # changed
     temperature: 1.0
+    top_p: 1.0
+    top_k: -1
+
 test_llm:
   parameters: 
     max_tokens: 8192
     temperature: 1.0
-    top_p: 0.95
-    top_k: 50
+    top_p: 1.0
+    top_k: -1
 
 vllm_config:
   use_v1: false
@@ -72,7 +77,7 @@ vllm_config:
     tensor-parallel-size: 1
     pipeline-parallel-size: 1
     generation-config: vllm
-    max_model_len: 12000
+    max_model_len: 10000
 
 world: # 3 + 1 GPUs # KUSHA: Can also do 2+2 here depending on what's faster
   replicas: 1

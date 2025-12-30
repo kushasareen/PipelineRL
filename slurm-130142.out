@@ -1,0 +1,6 @@
+Job is running... Restart count: 0
+slurmstepd: error: *** JOB 130142 ON tc11101 CANCELLED AT 2025-12-29T23:39:02 ***
+---
+Job hitting time limit. Received SIGTERM.
+Requeuing job 130142
+---

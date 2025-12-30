@@ -7,4 +7,4 @@ module load arrow/21.0.0 python/3.11 opencv/4.11
 module load scipy-stack/2025a
 module load python-build-bundle/2023b
 
-. $SCRATCH/envs/prl/bin/activate
+. /scratch/k/ksareen/envs/prl/bin/activate

@@ -11,16 +11,34 @@ environment:
   _target_: pipelinerl.domains.math.MathEnvironment
 dataset_loader: pipelinerl.domains.math.load_datasets
 train_dataset_names:
-  # - deepscaler_preview
-  - numina
-  # - polaris
-test_dataset_names: # KUSHA: edit later
-  - aime_2024
-  # - math_hard_test
-  # - amc_2023
-  # - math_500
+- open_reasoner_zero_57k
+- open_reasoner_zero_extended_72k
+test_dataset_names:
+  - aime_2024_original
+  - amc_2023
+  - math_500
+
+deepspeed_config: deepspeed_stage3_bf16_cpu_offload
 
 max_prompt_characters: 4000
+
+finetune:
+  seq_length: 6000
+
+vllm_config:
+  vllm_kwargs:
+    max_model_len: 6000
+
+llm:
+  parameters:
+    max_tokens: 4000
+
+test_llm:
+  parameters:
+    max_tokens: 4000
+
+
+model_path: Qwen/Qwen2.5-7B
 
 # debug: # KUSHA: remove later
 #   debug_mode: finetune

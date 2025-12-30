@@ -1,5 +1,5 @@
 defaults:
-    - trial
+    - trial_3_1
     - _self_
 
 actor:
@@ -14,13 +14,15 @@ train_dataset_names:
   # - deepscaler_preview
   - numina
   # - polaris
-test_dataset_names: # KUSHA: edit later
-  - aime_2024
+test_dataset_names: null # KUSHA: edit later
+  # - aime_2024
   # - math_hard_test
   # - amc_2023
   # - math_500
 
 max_prompt_characters: 4000
+
+model_path: Qwen/Qwen3-4B-Base
 
 # debug: # KUSHA: remove later
 #   debug_mode: finetune

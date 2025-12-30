@@ -1,8 +1,13 @@
 command_file: null
 commands: null
 compute_environment: LOCAL_MACHINE
-distributed_type: NO
-mixed_precision: bf16
+
+deepspeed_config:
+  zero3_init_flag: true  # accelerate specific
+  # (leave this alone unless you're actually using deepspeed)
+
+distributed_type: NO          # <-- change from MULTI_GPU
+downcast_bf16: 'no'
 dynamo_backend: 'NO'
 fsdp_config: {}
 gpu_ids: null
@@ -12,7 +17,9 @@ main_process_port: null
 main_training_function: main
 megatron_lm_config: {}
 num_processes: 1
-###########
 num_machines: 1
-rdzv_backend: c10d
+rdzv_backend: static
 same_network: true
+tpu_name: null
+tpu_zone: null
+use_cpu: false

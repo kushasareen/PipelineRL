@@ -76,9 +76,9 @@ def validate_config(cfg: DictConfig):
             raise ValueError("Cannot use pop_old_data with preprocessor dataset_buffer_size > 0")
 
     # Check for value loss coefficient constraints
-    if cfg.finetune.model_class == "causal-language-modeling-with-value-head":
+    if "causal-language-modeling-with-value" in cfg.finetune.model_class:
         if not hasattr(cfg.finetune.rl, "value_loss_coef") or cfg.finetune.rl.value_loss_coef <= 0.0:
-            raise ValueError("value_loss_coef must be greater than 0 when using causal-language-modeling-with-value-head")
+            raise ValueError("value_loss_coef must be greater than 0 when using causal-language-modeling-with-value")
 
     # Check that model being tuned to the max length accepted by inference
     if cfg.finetune.seq_length < cfg.vllm_config.vllm_kwargs.max_model_len:
@@ -89,7 +89,7 @@ def validate_config(cfg: DictConfig):
 
     # Check for asymmetric PPO clipping
     if cfg.finetune.rl.policy_loss == "ppo" and cfg.finetune.rl.epsilon_low != cfg.finetune.rl.epsilon_high:
-        if cfg.finetune.model_class == "causal-language-modeling-with-value-head":
+        if "causal-language-modeling-with-value" in cfg.finetune.model_class:
             logger.warning(
                 "Asymmetric clipping with value head has not been tested and it may lead to unexpected behavior. "
                 "It was recommended in DAPO (https://arxiv.org/abs/2503.14476) for GRPO (PPO without value head and group_size > 1)."

@@ -22,5 +22,7 @@ test_dataset_names: # KUSHA: edit later
 
 max_prompt_characters: 4000
 
+model_path: deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+
 # debug: # KUSHA: remove later
 #   debug_mode: finetune

@@ -1,0 +1,7 @@
+defaults:
+  - ppo
+  - _self_
+
+# value model is a separate network
+model_class: causal-language-modeling-with-value-model # causal-language-modeling-with-value-head
+value_model_path: Qwen/Qwen2.5-Math-PRM-7B

@@ -23,7 +23,7 @@ from transformers.models.auto.modeling_auto import _BaseAutoModelClass
 from .context import get_accelerator, logger
 from .lora import has_lora_checkpoint, lora_load, lora_save, prepare_lora_model
 from .types import ModelClass, TrainingMetrics
-from .value_model import AutoModelForCausalLMWithValueHead
+from .value_model import AutoModelForCausalLMWithValueHead, AutoModelForCausalLMAndSeparateValue
 
 
 def is_deepspeed_model(model) -> bool:
@@ -114,6 +114,8 @@ def get_auto_model_class(
             return AutoModelForCausalLM
         case "causal-language-modeling-with-value-head":
             return AutoModelForCausalLMWithValueHead
+        case "causal-language-modeling-with-value-model":
+            return AutoModelForCausalLMAndSeparateValue
         case "seq2seq-language-modeling":
             return AutoModelForSeq2SeqLM
         case "vision2seq-language-modeling":
@@ -177,7 +179,10 @@ def load_model(args, model_class, current_dir):
     if getattr(get_accelerator().state, "deepspeed_plugin", None):
         del loading_args["low_cpu_mem_usage"]  # deepspeed is not compatible with this option
         is_ds_zero_3 = get_accelerator().state.deepspeed_plugin.zero_stage == 3  # type: ignore
-
+    
+    
+    if args.value_model_path:
+        loading_args["value_model_path"] = args.value_model_path
     if args.load_as_bf16:
         loading_args["torch_dtype"] = torch.bfloat16
     if args.auto_device_map:
@@ -409,7 +414,7 @@ def save_model_only(
     logger.info(f"type of unwrapped_model: {type(unwrapped_model)}")
     
     # Handle value head model
-    if isinstance(unwrapped_model, AutoModelForCausalLMWithValueHead):
+    if isinstance(unwrapped_model, AutoModelForCausalLMWithValueHead): # KUSHA: do something here?
         logger.info("Saving model with value head")
         unwrapped_model.save_pretrained(
             output_dir,

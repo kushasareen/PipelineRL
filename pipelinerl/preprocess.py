@@ -321,6 +321,7 @@ def filter_zero_advantage_groups(dataset: list[dict], epsilon: float = 1e-6) -> 
         has_non_zero_advantage = False
         for entry in entries:
             # advantages is a list, check if any absolute value is > epsilon
+            # logger.info(entry["advantages"])
             if any(abs(adv) > epsilon for adv in entry["advantages"]):
                 has_non_zero_advantage = True
                 break
