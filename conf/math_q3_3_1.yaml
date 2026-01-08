@@ -21,7 +21,7 @@ test_dataset_names: # KUSHA: edit later
   # - amc_2023
   # - math_500
 
-max_prompt_characters: 4000
+max_prompt_characters: 3000
 
 model_path: Qwen/Qwen3-4B
 

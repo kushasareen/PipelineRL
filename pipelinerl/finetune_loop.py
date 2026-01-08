@@ -26,7 +26,7 @@ from torch.distributed.fsdp.api import MixedPrecision
 from transformers import PreTrainedTokenizerFast, get_scheduler, set_seed
 from ring_flash_attn import substitute_hf_flash_attn, update_ring_flash_attn_params
 
-from pipelinerl.finetune.value_model import AutoModelForCausalLMWithValueHead
+from pipelinerl.finetune.value_model import AutoModelForCausalLMWithValueHead, AutoModelForCausalLMAndSeparateValue
 import pipelinerl.torch_utils
 from pipelinerl.finetune.types import PipelineBatchEncoding
 from pipelinerl.finetune.checkpoints import (
@@ -195,7 +195,7 @@ class WeightUpdateManager:
             # Filter out value head parameters and get only the pretrained model parameters
             named_parameters = (
                 dict(module.pretrained_model.named_parameters())
-                if isinstance(module, AutoModelForCausalLMWithValueHead)
+                if isinstance(module, AutoModelForCausalLMWithValueHead) or isinstance(module, AutoModelForCausalLMAndSeparateValue)
                 else dict(module.named_parameters())
             )
             

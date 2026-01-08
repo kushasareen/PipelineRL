@@ -31,6 +31,7 @@ sbatch <<EOT
 #SBATCH --time=$hrs:00:00
 #SBATCH --job-name=$NAME
 #SBATCH --signal=B:TERM@120
+#SBATCH --open-mode=append
 
 echo "Job is running... Restart count: \${SLURM_RESTART_COUNT:-0}"
 
@@ -53,5 +54,13 @@ cd ~/PipelineRL
 . tamia_activate.sh
 source .env
 
-srun --kill-on-bad-exit=1 bash scripts/run.sh -a $algo -c $conf -i $id
+bash scripts/run.sh -a $algo -c $conf -i $id &
+
+# Capture the Process ID (PID) of the background command
+child_pid=\$!
+
+# Wait for the process to finish.
+# If a signal arrives, 'wait' exits, and the trap is executed.
+wait "\$child_pid"
+
 EOT

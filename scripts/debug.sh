@@ -1,1 +1,1 @@
-bash scripts/run.sh -a dapo -c math_q3_base_3_1 -i d
+bash scripts/run.sh -a vapo_tweak_coef_sep -c math_trial_debug -i d

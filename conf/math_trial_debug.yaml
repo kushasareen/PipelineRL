@@ -1,5 +1,5 @@
 defaults:
-    - trial
+    - trial_3_1 # KUSHA: Also try with regular just with the offload
     - _self_
 
 actor:
@@ -19,3 +19,8 @@ test_dataset_names: null # KUSHA: edit later
 
 debug: # KUSHA: remove later
   debug_mode: finetune
+
+model_path: Qwen/Qwen3-4B
+
+finetune:
+  gradient_accumulation_passes: 64 # for debug

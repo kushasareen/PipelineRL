@@ -45,7 +45,7 @@ lr_scheduler_type: cosine # could be cosine, constant_with_warmup
 # Number of warmup (completed) steps in the learning rate schedule.
 num_warmup_steps: 20
 # Number of gradient accumulation steps.
-gradient_accumulation_passes: 512 # KUSHA: 50 * 16 = 320 trajectories per update
+gradient_accumulation_passes: 320 # for speed-test, previously 512 # KUSHA: 50 * 16 = 320 trajectories per update
 # Use gradient checkpointing to reduce memory footprint.
 gradient_checkpointing: true
 # see https://medium.com/pytorch/how-activation-checkpointing-enables-scaling-up-training-deep-learning-models-7a93ae01ff2d
@@ -63,7 +63,7 @@ interrupt_train_steps: -1
 # Maximum number of evaluation (completed) steps. If -1 the full dataset is evaluated.
 max_eval_steps: -1
 # Sequence lengths used for training.
-seq_length: 10000 # 12000 before fp32 lm head
+seq_length: 11000 # 12000 before fp32 lm head
 
 seq_packing: true
 output_dir: ${..output_dir}/finetune
@@ -77,7 +77,7 @@ keep_intermediate_checkpoints: True
 trust_remote_code: false
 # Whether to empty the cache every training pass. Usually not worth it except for very large models if OOM
 cuda_empty_cache: false
-sft_config_name: null
+isft_config_name: null
 n_examples: 0 # 0 means do not limit number of samples
 log_each_n_steps: 1
 also_save_steps: []

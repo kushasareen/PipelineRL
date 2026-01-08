@@ -336,25 +336,25 @@ def load_datasets(dataset_names: List[str] | str | None, seed: int | None = None
         datasets += add_ids(samples)
 
     if "aime_2022" in dataset_names:
-        datasets += _load_aime_dataset(2022, upsample_factor=64)
+        datasets += _load_aime_dataset(2022, upsample_factor=32)
 
     if "aime_2022_original" in dataset_names:
         datasets += _load_aime_dataset(2022)
 
     if "aime_2023" in dataset_names:
-        datasets += _load_aime_dataset(2023, upsample_factor=64)
+        datasets += _load_aime_dataset(2023, upsample_factor=32)
 
     if "aime_2023_original" in dataset_names:
         datasets += _load_aime_dataset(2023)
 
     if "aime_2024" in dataset_names:
-        datasets += _load_aime_dataset(2024, upsample_factor=64)
+        datasets += _load_aime_dataset(2024, upsample_factor=32)
 
     if "aime_2024_original" in dataset_names:
         datasets += _load_aime_dataset(2024)
 
     if "aime_2025" in dataset_names:
-        upsample_factor = 64
+        upsample_factor = 32
         dataset = load_dataset("math-ai/aime25", split="test", trust_remote_code=True)
         samples = [s for s in process_aime_and_amc(dataset, dataset_name='aime') if s is not None]
         if upsample_factor > 0:
