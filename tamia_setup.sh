@@ -11,7 +11,7 @@ module load python-build-bundle/2023b
 python -m venv $SCRATCH/envs/prl
 . $SCRATCH/envs/prl/bin/activate
 
-pip install torch==2.6.0 torchvipision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
+pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
 pip install playwright-1.44.0-py3-none-linux_x86_64.whl
 pip install peft==0.12.0
 pip install -e . --no-build-isolation

@@ -85,7 +85,7 @@ def batch_annotate_traces_with_ref_logprobs(llm: TrainableLLM, traces: List[dict
         trace["ref_logprobs"] = [c["logprob"] for c in ref_logprobs["content"]]
         assert len(trace["ref_logprobs"]) == len(trace["logprobs"]), (
             f"{len(trace['ref_logprobs'])} != {len(trace['logprobs'])}"
-        )
+        )       
 
 
 def replace_oov_tokens_with_the(data: list[dict], tokenizer: transformers.PreTrainedTokenizerBase) -> list[dict]:
