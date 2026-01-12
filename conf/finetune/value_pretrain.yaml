@@ -10,6 +10,6 @@ weight_decay: 0
 
 rl:
   value_loss_coef: 1
-  adv_multipier: 0.0 # no policy updates
+  adv_multiplier: 0.0 # no policy updates
 
 # KUSHA: I think we need to initialize the value model from some reward model? Which one to use?
