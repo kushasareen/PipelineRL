@@ -317,6 +317,7 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
         # Extract pretrained model and value head state dicts
         pretrained_model_state_dict = {}
         value_head_state_dict = {}
+        value_model_state_dict = {}
         
         for key, value in state_dict.items():
             if key.startswith("value_head."):
@@ -327,10 +328,14 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
                 # Remove the "pretrained_model." prefix
                 new_key = key[len("pretrained_model."):]
                 pretrained_model_state_dict[new_key] = value
+            elif key.startswith("value_model."):
+                # Remove the "value_model." prefix
+                new_key = key[len("value_model."):]
+                value_model_state_dict[new_key] = value
             else:
                 raise ValueError(
                     f"Unexpected key in state dict: {key}. "
-                    "Expected keys should start with 'value_head.' or 'pretrained_model.'."
+                    "Expected keys should start with 'value_head.' or 'pretrained_model.' or 'value_model.'."
                 )
         
         # Save the pretrained model which can be easily loaded by vllm, etc.
@@ -344,10 +349,10 @@ class AutoModelForCausalLMAndSeparateValue(AutoModelForCausalLMWithValueHead):
         )
 
         value_path = os.path.join(save_directory, "value_model")
-        self.value_model.save_pretrained( # TODO
+        self.value_model.save_pretrained(
             value_path,
             is_main_process=is_main_process,
-            state_dict=pretrained_model_state_dict,
+            state_dict=value_model_state_dict,
             save_function=save_function,
             safe_serialization=safe_serialization,
             **kwargs,

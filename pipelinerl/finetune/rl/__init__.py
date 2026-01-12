@@ -125,6 +125,8 @@ class RLConfig(BaseModel):
         description = "Coefficient for SFT Loss added for only positive examples"
     )
 
+    adv_multiplier: float = Field(default=1.0, description = "Multiplier for advantages, allowing value model only training")
+
 def make_rl_data_callback(args, current_dir, rl_config, model):
     if rl_config:
         populate_rl_data_ = partial(
@@ -326,6 +328,10 @@ def rl_step(
             advantages = rewards - value_predictions
     else:
         advantages = batch.advantages[:, 1:]
+
+    # Use adv_multiplier
+    advantages *= config.adv_multiplier
+
 
     log_p_weights = advantages.detach() if config.use_advantages else rewards
     if config.relu_log_p_weights:

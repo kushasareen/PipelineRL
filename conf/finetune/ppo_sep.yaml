@@ -1,5 +1,5 @@
 defaults:
-  - vapo_tweak_coef
+  - ppo
   - _self_
 
 # value model is a separate network
