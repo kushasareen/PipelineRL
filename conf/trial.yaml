@@ -57,9 +57,9 @@ llm:
 test_llm:
   parameters: 
     max_tokens: 8192
-    temperature: 1.0
-    top_p: 1.0
-    top_k: -1
+    temperature: 1.0 # 1.0
+    top_p: 1.0 # 1.0
+    top_k: -1 # -1
 
 vllm_config:
   use_v1: false
