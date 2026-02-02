@@ -1,0 +1,9 @@
+defaults:
+  - vapo_tweak_coef
+  - _self_
+
+# value model is a separate network
+model_class: causal-language-modeling-with-value-model # causal-language-modeling-with-value-head
+value_model_path: /scratch/k/ksareen/pipeline-rl/results/math_q3_3_1_value_pretrain_redo2/finetune/current/value_model
+
+model_path: /scratch/k/ksareen/pipeline-rl/results/math_q3_3_1_value_pretrain_redo2/finetune/current

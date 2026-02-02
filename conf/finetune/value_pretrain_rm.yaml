@@ -1,0 +1,18 @@
+defaults:
+  - ppo_sep
+  - _self_
+
+model_class: causal-language-modeling-with-value-model
+attempts: 1
+
+# No policy updates
+weight_decay: 0
+
+rl:
+  value_loss_coef: 1
+  adv_multiplier: 0.0 # no policy updates
+
+# KUSHA: I think we need to initialize the value model from some reward model? Which one to use?
+
+test_dataset_names: null
+value_model_path: NiuTrans/GRAM-Qwen3-4B-RewardModel
